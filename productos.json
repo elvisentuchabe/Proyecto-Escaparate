@@ -1,0 +1,502 @@
+[
+  {
+    "id": 1,
+    "nombre": "Nike Air Zoom Pegasus 40",
+    "precio": 130,
+    "descripcion": "La zapatilla de running más fiable y versátil para entrenamiento diario.",
+    "imagen": "img/nike_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 5500,
+    "stock": 20
+  },
+  {
+    "id": 2,
+    "nombre": "Adidas Ultraboost Light",
+    "precio": 190,
+    "descripcion": "Retorno de energía increíble con un 30% menos de peso.",
+    "imagen": "img/adidas_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 4200,
+    "stock": 15
+  },
+  {
+    "id": 3,
+    "nombre": "Asics Novablast 4",
+    "precio": 150,
+    "descripcion": "Efecto trampolín y máxima reactividad para ritmos alegres.",
+    "imagen": "img/asics_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 3800,
+    "stock": 12
+  },
+  {
+    "id": 4,
+    "nombre": "Hoka Clifton 9",
+    "precio": 150,
+    "descripcion": "Amortiguación suave y ligera para devorar kilómetros sin impacto.",
+    "imagen": "img/hoka_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 4900,
+    "stock": 18
+  },
+  {
+    "id": 5,
+    "nombre": "Saucony Endorphin Speed 4",
+    "precio": 180,
+    "descripcion": "Placa de nylon y espuma PWRRUN PB para entrenamientos rápidos.",
+    "imagen": "img/saucony_running_shoe.gif",
+    "categoria": "running",
+    "visitas": 2100,
+    "stock": 8
+  },
+  {
+    "id": 6,
+    "nombre": "Brooks Ghost 15",
+    "precio": 150,
+    "descripcion": "Pisada suave y fluida, la favorita para corredores neutros.",
+    "imagen": "img/brooks_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 3100,
+    "stock": 25
+  },
+  {
+    "id": 7,
+    "nombre": "New Balance Fresh Foam X 1080v13",
+    "precio": 190,
+    "descripcion": "La máxima expresión de comodidad y amortiguación de New Balance.",
+    "imagen": "img/new_balance_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 2800,
+    "stock": 10
+  },
+  {
+    "id": 8,
+    "nombre": "Mizuno Wave Rider 27",
+    "precio": 160,
+    "descripcion": "Equilibrio perfecto entre propulsión y estabilidad.",
+    "imagen": "img/mizuno_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 1500,
+    "stock": 14
+  },
+  {
+    "id": 9,
+    "nombre": "Garmin Forerunner 265",
+    "precio": 500,
+    "descripcion": "Reloj GPS con pantalla AMOLED brillante y métricas avanzadas.",
+    "imagen": "img/sports_watch.jpg",
+    "categoria": "running",
+    "visitas": 6200,
+    "stock": 5
+  },
+  {
+    "id": 10,
+    "nombre": "Polar Pacer Pro",
+    "precio": 330,
+    "descripcion": "Reloj de running ultraligero con barómetro integrado.",
+    "imagen": "img/sports_watch.jpg",
+    "categoria": "running",
+    "visitas": 1800,
+    "stock": 9
+  },
+  {
+    "id": 11,
+    "nombre": "Coros Pace 3",
+    "precio": 250,
+    "descripcion": "La mejor batería del mercado para un reloj GPS ligero.",
+    "imagen": "img/sports_watch.jpg",
+    "categoria": "running",
+    "visitas": 3500,
+    "stock": 20
+  },
+  {
+    "id": 12,
+    "nombre": "Apple Watch Ultra 2",
+    "precio": 900,
+    "descripcion": "El reloj deportivo definitivo para aventuras extremas.",
+    "imagen": "img/sports_watch.jpg",
+    "categoria": "running",
+    "visitas": 8000,
+    "stock": 2
+  },
+  {
+    "id": 13,
+    "nombre": "Auriculares Shokz OpenRun Pro",
+    "precio": 190,
+    "descripcion": "Conducción ósea para escuchar música sin aislarte del entorno.",
+    "imagen": "img/headphones.jpg",
+    "categoria": "running",
+    "visitas": 2200,
+    "stock": 30
+  },
+  {
+    "id": 14,
+    "nombre": "Camiseta Nike Dri-FIT Miler",
+    "precio": 35,
+    "descripcion": "Tejido transpirable que capilariza el sudor.",
+    "imagen": "img/t-shirt.jpg",
+    "categoria": "running",
+    "visitas": 1200,
+    "stock": 50
+  },
+  {
+    "id": 15,
+    "nombre": "Pantalón Adidas Own The Run",
+    "precio": 40,
+    "descripcion": "Shorts ligeros con detalles reflectantes para la noche.",
+    "imagen": "img/pantalon.jpg",
+    "categoria": "running",
+    "visitas": 900,
+    "stock": 45
+  },
+  {
+    "id": 16,
+    "nombre": "Calcetines Lurbel Desafio",
+    "precio": 22,
+    "descripcion": "Tecnología Bmax para prevenir ampollas en largas distancias.",
+    "imagen": "img/calcetines.jpg",
+    "categoria": "running",
+    "visitas": 600,
+    "stock": 100
+  },
+  {
+    "id": 17,
+    "nombre": "Gorra Salomon XA Cap",
+    "precio": 30,
+    "descripcion": "Ligera, transpirable y de secado rápido.",
+    "imagen": "img/gorra.jpg",
+    "categoria": "running",
+    "visitas": 400,
+    "stock": 25
+  },
+  {
+    "id": 18,
+    "nombre": "Cinturón Salomon Pulse Belt",
+    "precio": 30,
+    "descripcion": "Ajuste perfecto para llevar el móvil y las llaves sin rebote.",
+    "imagen": "img/cinturon.jpg",
+    "categoria": "running",
+    "visitas": 1100,
+    "stock": 35
+  },
+  {
+    "id": 19,
+    "nombre": "Chaleco Salomon Adv Skin 12",
+    "precio": 160,
+    "descripcion": "El rey de la hidratación para trail running y ultra fondo.",
+    "imagen": "img/chaleco_trail_running.jpg",
+    "categoria": "running",
+    "visitas": 2500,
+    "stock": 7
+  },
+  {
+    "id": 20,
+    "nombre": "Cortavientos Odlo Zeroweight",
+    "precio": 100,
+    "descripcion": "Protección contra el viento en un paquete ultraligero.",
+    "imagen": "img/cortavientos.jpg",
+    "categoria": "running",
+    "visitas": 750,
+    "stock": 12
+  },
+  {
+    "id": 21,
+    "nombre": "Nike Vaporfly 3",
+    "precio": 260,
+    "descripcion": "La zapatilla de competición más famosa con placa de carbono.",
+    "imagen": "img/nike_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 7000,
+    "stock": 3
+  },
+  {
+    "id": 22,
+    "nombre": "Adidas Adizero Adios Pro 3",
+    "precio": 250,
+    "descripcion": "Récords mundiales avalan esta zapatilla de maratón.",
+    "imagen": "img/adidas_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 4500,
+    "stock": 4
+  },
+  {
+    "id": 23,
+    "nombre": "Asics Metaspeed Sky Paris",
+    "precio": 250,
+    "descripcion": "Diseñada para corredores que aumentan su zancada al acelerar.",
+    "imagen": "img/asics_running_shoe.jpg",
+    "categoria": "running",
+    "visitas": 3200,
+    "stock": 5
+  },
+  {
+    "id": 24,
+    "nombre": "On Running Cloudmonster",
+    "precio": 180,
+    "descripcion": "La mayor amortiguación CloudTec para una pisada monstruosa.",
+    "imagen": "img/saucony_running_shoe.gif",
+    "categoria": "running",
+    "visitas": 2900,
+    "stock": 11
+  },
+  {
+    "id": 25,
+    "nombre": "Pack Geles Maurten Gel 100",
+    "precio": 40,
+    "descripcion": "Caja de 12 geles con tecnología de hidrogel para evitar problemas estomacales.",
+    "imagen": "img/geles.jpg",
+    "categoria": "running",
+    "visitas": 1500,
+    "stock": 60
+  },
+  {
+    "id": 26,
+    "nombre": "Specialized Tarmac SL8 Pro",
+    "precio": 6500,
+    "descripcion": "La bicicleta más rápida del mundo, combinación de aero y ligereza.",
+    "imagen": "img/bicicleta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 9000,
+    "stock": 1
+  },
+  {
+    "id": 27,
+    "nombre": "Trek Madone SLR 7",
+    "precio": 9000,
+    "descripcion": "Tecnología IsoFlow para una aerodinámica sin precedentes.",
+    "imagen": "img/bicicleta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 8500,
+    "stock": 1
+  },
+  {
+    "id": 28,
+    "nombre": "Canyon Ultimate CF SL 8",
+    "precio": 3000,
+    "descripcion": "Relación calidad-precio imbatible para una escaladora pura.",
+    "imagen": "img/bicicleta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 6700,
+    "stock": 3
+  },
+  {
+    "id": 29,
+    "nombre": "Orbea Orca M30",
+    "precio": 2600,
+    "descripcion": "Bicicleta de carretera de carbono ligera y reactiva.",
+    "imagen": "img/bicicleta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 5200,
+    "stock": 5
+  },
+  {
+    "id": 30,
+    "nombre": "Giant Propel Advanced",
+    "precio": 3200,
+    "descripcion": "Minimiza la resistencia al aire y maximiza la velocidad.",
+    "imagen": "img/bicicleta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 4100,
+    "stock": 2
+  },
+  {
+    "id": 31,
+    "nombre": "Casco Specialized S-Works Evade 3",
+    "precio": 300,
+    "descripcion": "El casco aero más ventilado del pelotón.",
+    "imagen": "img/casco.jpg",
+    "categoria": "ciclismo",
+    "visitas": 3200,
+    "stock": 10
+  },
+  {
+    "id": 32,
+    "nombre": "Casco Giro Aether Spherical",
+    "precio": 320,
+    "descripcion": "Protección MIPS Spherical integrada para máxima seguridad.",
+    "imagen": "img/casco.jpg",
+    "categoria": "ciclismo",
+    "visitas": 1500,
+    "stock": 8
+  },
+  {
+    "id": 33,
+    "nombre": "Casco POC Ventral Air Mips",
+    "precio": 260,
+    "descripcion": "Diseño único y ventilación extrema para días calurosos.",
+    "imagen": "img/casco.jpg",
+    "categoria": "ciclismo",
+    "visitas": 2100,
+    "stock": 12
+  },
+  {
+    "id": 34,
+    "nombre": "Gafas Oakley Sutro Lite",
+    "precio": 170,
+    "descripcion": "Campo de visión amplio y lentes Prizm de alto contraste.",
+    "imagen": "img/gafas.jpg",
+    "categoria": "ciclismo",
+    "visitas": 4800,
+    "stock": 25
+  },
+  {
+    "id": 35,
+    "nombre": "Gafas 100% Speedcraft",
+    "precio": 190,
+    "descripcion": "Las gafas favoritas de Peter Sagan.",
+    "imagen": "img/gafas.jpg",
+    "categoria": "ciclismo",
+    "visitas": 3000,
+    "stock": 20
+  },
+  {
+    "id": 36,
+    "nombre": "Maillot Castelli Gabba RoS 2",
+    "precio": 200,
+    "descripcion": "La prenda original para lluvia y frío, ahora mejorada.",
+    "imagen": "img/maillot.jpg",
+    "categoria": "ciclismo",
+    "visitas": 2500,
+    "stock": 15
+  },
+  {
+    "id": 37,
+    "nombre": "Culotte Assos Equipe RS",
+    "precio": 240,
+    "descripcion": "El estándar de oro en comodidad para largas distancias.",
+    "imagen": "img/culotte.jpg",
+    "categoria": "ciclismo",
+    "visitas": 1800,
+    "stock": 10
+  },
+  {
+    "id": 38,
+    "nombre": "Maillot Gobik CX Pro 3.0",
+    "precio": 75,
+    "descripcion": "Ultraligero y ajustado, diseño español de moda.",
+    "imagen": "img/maillot.jpg",
+    "categoria": "ciclismo",
+    "visitas": 5500,
+    "stock": 30
+  },
+  {
+    "id": 39,
+    "nombre": "Culotte Gobik Absolute",
+    "precio": 120,
+    "descripcion": "Compresión excelente y badana K10 de carbono.",
+    "imagen": "img/culotte.jpg",
+    "categoria": "ciclismo",
+    "visitas": 5200,
+    "stock": 25
+  },
+  {
+    "id": 40,
+    "nombre": "Zapatillas Shimano S-Phyre RC903",
+    "precio": 380,
+    "descripcion": "Transferencia de potencia profesional y ajuste BOA doble.",
+    "imagen": "img/zapatillas.jpg",
+    "categoria": "ciclismo",
+    "visitas": 2000,
+    "stock": 6
+  },
+  {
+    "id": 41,
+    "nombre": "Zapatillas Fizik Vento Infinito",
+    "precio": 350,
+    "descripcion": "Suela de carbono rígida y diseño italiano elegante.",
+    "imagen": "img/zapatillas.jpg",
+    "categoria": "ciclismo",
+    "visitas": 1200,
+    "stock": 8
+  },
+  {
+    "id": 42,
+    "nombre": "Garmin Edge 1040 Solar",
+    "precio": 750,
+    "descripcion": "El ciclocomputador definitivo con carga solar.",
+    "imagen": "img/ciclocomputador.jpg",
+    "categoria": "ciclismo",
+    "visitas": 6500,
+    "stock": 4
+  },
+  {
+    "id": 43,
+    "nombre": "Wahoo Elemnt Bolt V2",
+    "precio": 280,
+    "descripcion": "Navegación aerodinámica y fácil de usar.",
+    "imagen": "img/ciclocomputador.jpg",
+    "categoria": "ciclismo",
+    "visitas": 3100,
+    "stock": 12
+  },
+  {
+    "id": 44,
+    "nombre": "Radar Garmin Varia RTL515",
+    "precio": 200,
+    "descripcion": "Luz trasera que te avisa de los coches que se acercan.",
+    "imagen": "img/radar.jpg",
+    "categoria": "ciclismo",
+    "visitas": 5800,
+    "stock": 20
+  },
+  {
+    "id": 45,
+    "nombre": "Pedales Shimano Ultegra",
+    "precio": 150,
+    "descripcion": "Cuerpo de carbono compuesto, ligeros y duraderos.",
+    "imagen": "img/pedales.jpg",
+    "categoria": "ciclismo",
+    "visitas": 2200,
+    "stock": 30
+  },
+  {
+    "id": 46,
+    "nombre": "Potenciómetro Favero Assioma Duo",
+    "precio": 700,
+    "descripcion": "Medición de potencia en ambos pedales, fiable y preciso.",
+    "imagen": "img/potenciometro.jpg",
+    "categoria": "ciclismo",
+    "visitas": 1900,
+    "stock": 5
+  },
+  {
+    "id": 47,
+    "nombre": "Rodillo Wahoo Kickr Core",
+    "precio": 600,
+    "descripcion": "Entrenamiento indoor silencioso y realista.",
+    "imagen": "img/rodillo.jpg",
+    "categoria": "ciclismo",
+    "visitas": 2400,
+    "stock": 3
+  },
+  {
+    "id": 48,
+    "nombre": "Cubierta Continental GP5000 S TR",
+    "precio": 80,
+    "descripcion": "El neumático tubeless más rápido y resistente.",
+    "imagen": "img/cubierta.jpg",
+    "categoria": "ciclismo",
+    "visitas": 7000,
+    "stock": 100
+  },
+  {
+    "id": 49,
+    "nombre": "Bomba Topeak JoeBlow Sport",
+    "precio": 50,
+    "descripcion": "La bomba de pie clásica, robusta y fiable.",
+    "imagen": "img/bomba.jpg",
+    "categoria": "ciclismo",
+    "visitas": 800,
+    "stock": 15
+  },
+  {
+    "id": 50,
+    "nombre": "Bolsa Sillín Ortlieb Micro Two",
+    "precio": 40,
+    "descripcion": "Impermeable y compacta para llevar herramientas.",
+    "imagen": "img/bolsa_sillin.jpg",
+    "categoria": "ciclismo",
+    "visitas": 600,
+    "stock": 22
+  }
+]
