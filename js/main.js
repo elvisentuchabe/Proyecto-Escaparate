@@ -1,280 +1,325 @@
+/**
+ * Lógica principal de SportSprint - OPTIMIZADA
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
+    checkSesion();
     inicializarCarrito();
     checkCookies();
-    configurarBusqueda(); // Buscador inteligente
+    configurarBusqueda();
+    configurarLogin();
 });
 
-// Ruta al JSON
 const URL_JSON = 'productos.json';
+let productosGlobales = []; 
+let usuarioActual = null; 
+const USUARIOS = [
+    { user: 'admin', pass: '1234', nombre: 'Administrador' },
+    { user: 'cliente', pass: '1234', nombre: 'Cliente Habitual' }
+];
 
-// Variable GLOBAL para tener los productos siempre a mano para buscar
-let productosGlobales = [];
-
-// --- 1. CARGA DE DATOS (AJAX) ---
-async function cargarProductos() {
-    try {
-        const response = await fetch(URL_JSON);
-        if (!response.ok) throw new Error("Error al cargar JSON");
-        
-        // Guardamos los productos en la variable global para el buscador
-        productosGlobales = await response.json();
-        
-        renderizarCarrusel(productosGlobales);
-        renderizarCatalogo(productosGlobales);
-
-    } catch (error) {
-        console.error("Error:", error);
-        document.getElementById('contenedor-productos').innerHTML = 
-            `<div class="alert alert-danger">Error cargando productos. Intenta usar un servidor local.</div>`;
+// ... (Las funciones de Login, Logout, checkSesion y actualizarUserUI se mantienen IGUAL) ...
+function configurarLogin() {
+    const formLogin = document.getElementById('formLogin');
+    if(formLogin) {
+        formLogin.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('usuarioInput').value;
+            const pass = document.getElementById('passwordInput').value;
+            login(user, pass);
+        });
     }
 }
 
-// --- 2. RENDERIZAR CARRUSEL ---
+function login(user, pass) {
+    const usuarioEncontrado = USUARIOS.find(u => u.user === user && u.pass === pass);
+    if (usuarioEncontrado) {
+        usuarioActual = usuarioEncontrado;
+        localStorage.setItem('sesionActiva', JSON.stringify(usuarioActual));
+        const modalEl = document.getElementById('loginModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+        document.getElementById('formLogin').reset();
+        document.getElementById('loginError').style.display = 'none';
+        actualizarUserUI();
+        actualizarCarritoUI();
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
+
+function logout() {
+    usuarioActual = null;
+    localStorage.removeItem('sesionActiva');
+    actualizarUserUI();
+    actualizarCarritoUI();
+}
+
+function checkSesion() {
+    const sesionGuardada = localStorage.getItem('sesionActiva');
+    if (sesionGuardada) usuarioActual = JSON.parse(sesionGuardada);
+    actualizarUserUI();
+}
+
+function actualizarUserUI() {
+    const container = document.getElementById('user-container');
+    if (usuarioActual) {
+        container.innerHTML = `
+            <div class="dropdown">
+                <a href="#" class="text-white fs-5 dropdown-toggle text-decoration-none" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle text-primary"></i> <span class="fs-6 ms-1">${usuarioActual.user}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
+                INICIAR SESIÓN
+            </button>
+        `;
+    }
+}
+
+// --- CARGA DE PRODUCTOS OPTIMIZADA ---
+async function cargarProductos() {
+    try {
+        const response = await fetch(URL_JSON);
+        if (!response.ok) throw new Error("Error");
+        productosGlobales = await response.json();
+        
+        const visitasLocales = JSON.parse(localStorage.getItem('contadorVisitas')) || {};
+        productosGlobales.forEach(prod => {
+            if (visitasLocales[prod.id]) prod.visitas += visitasLocales[prod.id];
+        });
+
+        renderizarCarrusel(productosGlobales);
+        renderizarCatalogo(productosGlobales);
+    } catch (error) { console.error(error); }
+}
+
 function renderizarCarrusel(productos) {
     const contenedor = document.getElementById('contenedor-carrusel');
+    if (!contenedor) return;
     const destacados = [...productos].sort((a, b) => b.visitas - a.visitas).slice(0, 3);
     
     let html = '';
     destacados.forEach((prod, index) => {
         const activeClass = index === 0 ? 'active' : ''; 
-        // IMPORTANTE: Pasamos 'prod.imagen' al carrito
+        // LCP OPTIMIZACIÓN: La primera imagen es 'eager' (carga urgente), las demás pueden esperar
+        const loadingAttr = index === 0 ? 'eager' : 'lazy';
+        const priorityAttr = index === 0 ? 'fetchpriority="high"' : ''; // NUEVO
+        
         html += `
-            <div class="carousel-item ${activeClass}">
-                <img src="${prod.imagen}" class="d-block w-100" alt="${prod.nombre}">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5 class="display-6 fw-bold text-uppercase">TOP VENTAS</h5>
-                    <h3>${prod.nombre}</h3>
-                    <p class="fs-5">${prod.precio} €</p>
-                    <button class="btn btn-warning fw-bold" onclick="agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">¡Lo quiero!</button>
-                </div>
-            </div>
-        `;
+    <div class="carousel-item ${activeClass}">
+        <img src="${prod.imagen}" class="d-block w-100" alt="${prod.nombre}" 
+             style="cursor: pointer" onclick="verDetalle(${prod.id})"
+             width="1200" height="450" loading="${loadingAttr}" ${priorityAttr}> 
+        ```;
     });
     contenedor.innerHTML = html;
 }
 
-// --- 3. RENDERIZAR CATÁLOGO ---
 function renderizarCatalogo(productos) {
     const contenedor = document.getElementById('contenedor-productos');
+    if (!contenedor) return;
     
-    // Gestión de búsqueda sin resultados
     if (productos.length === 0) {
-        contenedor.innerHTML = `
-            <div class="col-12 text-center mt-5">
-                <i class="bi bi-search display-1 text-muted"></i>
-                <h3 class="mt-3 text-muted">No encontramos productos con esa búsqueda</h3>
-                <p>Prueba con "zapatillas", "garmin" o "camiseta"</p>
-            </div>`;
+        contenedor.innerHTML = `<div class="col-12 text-center mt-5"><h3 class="text-white">No hay productos.</h3></div>`;
         return;
     }
 
     let html = '';
     productos.forEach(prod => {
-        // IMPORTANTE: Pasamos 'prod.imagen' al carrito
+        // PERFORMANCE: 
+        // 1. loading="lazy": Solo carga la imagen cuando haces scroll y llegas a ella.
+        // 2. width/height: Reserva el espacio para evitar saltos (CLS).
         html += `
             <div class="col">
                 <div class="card h-100 card-producto shadow-sm">
-                    <div class="position-relative">
-                        <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}">
-                        <div class="descripcion-overlay">
-                            <p class="small">${prod.descripcion}</p>
+                    <div class="position-relative" style="cursor: pointer;" onclick="verDetalle(${prod.id})">
+                        <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}"
+                             loading="lazy" width="300" height="250">
+                        <div class="descripcion-overlay flex-column">
+                             <i class="bi bi-cart-plus-fill display-3 icono-hover mb-2"></i>
+                             <span class="btn btn-sm btn-outline-light rounded-pill px-3">VER DETALLES</span>
                         </div>
                     </div>
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fs-6 fw-bold">${prod.nombre}</h5>
+                        <h5 class="card-title fs-6 fw-bold text-white text-truncate">${prod.nombre}</h5>
                         <div class="mt-auto d-flex justify-content-between align-items-center">
                             <span class="text-primary fw-bold fs-5">${prod.precio} €</span>
-                            <button class="btn btn-sm btn-outline-dark" onclick="agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">
-                                <i class="bi bi-cart-plus"></i> Añadir
+                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">
+                                <i class="bi bi-plus-lg"></i> AÑADIR
                             </button>
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                         <small class="text-muted text-uppercase" style="font-size: 0.7rem">${prod.categoria}</small>
-                    </div>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
     contenedor.innerHTML = html;
 }
 
-// --- 4. GESTIÓN DEL CARRITO (Lógica Visual Completa) ---
+// ... (El resto de funciones: verDetalle, carrito, búsqueda, cookies se mantienen IGUAL) ...
+function verDetalle(id) {
+    const producto = productosGlobales.find(p => p.id === id);
+    if (!producto) return;
+    producto.visitas++;
+    const visitasLocales = JSON.parse(localStorage.getItem('contadorVisitas')) || {};
+    visitasLocales[id] = (visitasLocales[id] || 0) + 1;
+    localStorage.setItem('contadorVisitas', JSON.stringify(visitasLocales));
+    renderizarCarrusel(productosGlobales);
+
+    document.getElementById('carruselDestacados').style.display = 'none';
+    document.getElementById('seccion-catalogo').style.display = 'none';
+    const seccionDetalle = document.getElementById('seccion-detalle');
+
+    seccionDetalle.innerHTML = `
+        <div class="row mt-5 align-items-center">
+            <div class="col-12 mb-4">
+                <button class="btn btn-outline-secondary" onclick="volverAlCatalogo()"><i class="bi bi-arrow-left"></i> VOLVER</button>
+            </div>
+            <div class="col-md-6">
+                <img src="${producto.imagen}" class="img-fluid rounded w-100 border border-secondary shadow-lg" loading="eager">
+            </div>
+            <div class="col-md-6 text-white">
+                <span class="badge bg-primary text-black mb-2">${producto.categoria}</span>
+                <h1 class="display-4 fw-bold text-white">${producto.nombre}</h1>
+                <p class="text-muted lead">${producto.descripcion || ''}</p>
+                <h2 class="text-primary display-5 fw-bold my-4">${producto.precio} €</h2>
+                <button class="btn btn-primary btn-lg w-100 py-3" onclick="agregarAlCarrito(${producto.id}, '${producto.nombre}', ${producto.precio}, '${producto.imagen}')">
+                    AÑADIR A LA CESTA
+                </button>
+            </div>
+        </div>`;
+    seccionDetalle.style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+function volverAlCatalogo() {
+    document.getElementById('seccion-detalle').style.display = 'none';
+    document.getElementById('carruselDestacados').style.display = 'block';
+    document.getElementById('seccion-catalogo').style.display = 'block';
+}
+
+function obtenerClaveCarrito() {
+    return usuarioActual ? `carrito_${usuarioActual.user}` : 'carrito_invitado';
+}
 
 function agregarAlCarrito(id, nombre, precio, imagen) {
-    let carrito = JSON.parse(localStorage.getItem('carritoSportSprint')) || [];
-    
-    // Guardamos ID, Nombre, Precio e IMAGEN
+    const clave = obtenerClaveCarrito();
+    let carrito = JSON.parse(localStorage.getItem(clave)) || [];
     carrito.push({ id, nombre, precio, imagen });
-    
-    localStorage.setItem('carritoSportSprint', JSON.stringify(carrito));
-    
-    // Actualizamos la interfaz completa (Contador + Lista desplegable)
+    localStorage.setItem(clave, JSON.stringify(carrito));
     actualizarCarritoUI();
-    
-    // Feedback opcional (puedes quitarlo si prefieres que sea silencioso)
-    alert(`¡${nombre} añadido al carrito!`);
 }
 
 function eliminarDelCarrito(index) {
-    let carrito = JSON.parse(localStorage.getItem('carritoSportSprint')) || [];
+    const clave = obtenerClaveCarrito();
+    let carrito = JSON.parse(localStorage.getItem(clave)) || [];
     carrito.splice(index, 1);
-    localStorage.setItem('carritoSportSprint', JSON.stringify(carrito));
+    localStorage.setItem(clave, JSON.stringify(carrito));
     actualizarCarritoUI();
 }
 
-function inicializarCarrito() {
-    actualizarCarritoUI();
-}
+function inicializarCarrito() { actualizarCarritoUI(); }
 
-// Esta función se encarga de TODO: Poner el número y dibujar la lista
 function actualizarCarritoUI() {
-    const carrito = JSON.parse(localStorage.getItem('carritoSportSprint')) || [];
-    
-    // 1. Actualizar el contador rojo del menú
+    const clave = obtenerClaveCarrito();
+    const carrito = JSON.parse(localStorage.getItem(clave)) || [];
     const contador = document.getElementById('contador-carrito');
     if(contador) contador.innerText = carrito.length;
-
-    // 2. Pintar los productos dentro del Offcanvas (Menú lateral)
     const contenedorCarrito = document.getElementById('carrito-body');
     const totalElemento = document.getElementById('carrito-total');
-    
     if (contenedorCarrito && totalElemento) {
-        contenedorCarrito.innerHTML = ''; // Limpiamos lo anterior
+        contenedorCarrito.innerHTML = '';
         let total = 0;
-
         if (carrito.length === 0) {
-            contenedorCarrito.innerHTML = `
-                <div class="text-center mt-5">
-                    <i class="bi bi-basket display-1 text-muted"></i>
-                    <p class="text-muted mt-3">Tu cesta está vacía.</p>
-                </div>
-            `;
+            contenedorCarrito.innerHTML = `<div class="text-center mt-5"><p class="text-muted">Cesta vacía.</p></div>`;
         } else {
             carrito.forEach((prod, index) => {
                 total += prod.precio;
-                
-                // Placeholder por si alguna imagen antigua fallara
                 const imgSrc = prod.imagen || 'https://via.placeholder.com/50';
-
-                const item = document.createElement('div');
-                item.classList.add('card', 'mb-3', 'border-0', 'shadow-sm');
-                item.innerHTML = `
-                    <div class="row g-0 align-items-center">
-                        <div class="col-3">
-                            <img src="${imgSrc}" class="img-fluid rounded-start" alt="${prod.nombre}" style="max-height: 60px; object-fit: contain;">
-                        </div>
-                        <div class="col-9">
-                            <div class="card-body p-2 position-relative">
-                                <h6 class="card-title mb-1 small fw-bold">${prod.nombre}</h6>
-                                <p class="card-text text-primary mb-0 small">${prod.precio} €</p>
-                                <button onclick="eliminarDelCarrito(${index})" class="btn btn-link text-danger p-0 position-absolute top-0 end-0 me-2" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                contenedorCarrito.innerHTML += `
+                    <div class="card mb-3 bg-dark text-white border-secondary">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-3"><img src="${imgSrc}" class="img-fluid rounded-start"></div>
+                            <div class="col-9">
+                                <div class="card-body p-2 position-relative">
+                                    <h6 class="mb-0 small fw-bold">${prod.nombre}</h6>
+                                    <p class="mb-0 small text-primary">${prod.precio} €</p>
+                                    <button onclick="eliminarDelCarrito(${index})" class="btn btn-link text-danger p-0 position-absolute top-0 end-0 me-2"><i class="bi bi-trash"></i></button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                contenedorCarrito.appendChild(item);
+                    </div>`;
             });
         }
-        
         totalElemento.innerText = total.toFixed(2) + ' €';
     }
 }
 
-// --- 5. SISTEMA DE BÚSQUEDA Y FILTROS ---
 function configurarBusqueda() {
     const inputBuscar = document.getElementById('inputBuscar');
     const btnVoz = document.getElementById('btnVoz');
     const botonesFiltro = document.querySelectorAll('.filter-btn');
 
-    // A) Búsqueda por TECLADO
-    inputBuscar.addEventListener('input', (evento) => {
-        const texto = evento.target.value.toLowerCase();
+    inputBuscar.addEventListener('input', (e) => {
+        const texto = e.target.value.toLowerCase();
+        if (document.getElementById('seccion-detalle').style.display === 'block') volverAlCatalogo();
         filtrarProductos(texto);
-        
-        // Reset visual de botones
-        botonesFiltro.forEach(btn => {
-            btn.classList.remove('active', 'btn-primary');
-            btn.classList.add('btn-outline-primary');
-        });
     });
 
-    // B) Filtro por CATEGORÍA (Botones)
     botonesFiltro.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Estilos
-            botonesFiltro.forEach(b => {
-                b.classList.remove('active', 'btn-primary');
-                b.classList.add('btn-outline-primary');
-            });
-            e.target.classList.remove('btn-outline-primary');
-            e.target.classList.add('active', 'btn-primary');
-
-            // Lógica
-            const categoria = e.target.getAttribute('data-cat');
-            inputBuscar.value = ''; // Limpiar buscador texto
-
-            if (categoria === 'all') {
-                renderizarCatalogo(productosGlobales);
-            } else {
-                const filtrados = productosGlobales.filter(p => 
-                    p.categoria.toLowerCase() === categoria
-                );
-                renderizarCatalogo(filtrados);
-            }
+            volverAlCatalogo();
+            botonesFiltro.forEach(b => { b.classList.remove('active'); });
+            e.target.classList.add('active');
+            const cat = e.target.getAttribute('data-cat');
+            inputBuscar.value = '';
+            if (cat === 'all') renderizarCatalogo(productosGlobales);
+            else renderizarCatalogo(productosGlobales.filter(p => p.categoria.toLowerCase() === cat));
         });
     });
 
-    // C) Búsqueda por VOZ
-    if ('webkitSpeechRecognition' in window) {
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = 'es-ES';
-        recognition.continuous = false;
-
+    if (btnVoz) {
         btnVoz.addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window)) { alert("Navegador no compatible."); return; }
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'es-ES';
             recognition.start();
-            btnVoz.innerHTML = '<i class="bi bi-mic-mute-fill text-danger"></i>';
+            const iconoOriginal = btnVoz.innerHTML;
+            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
+            recognition.onresult = (e) => {
+                inputBuscar.value = e.results[0][0].transcript;
+                inputBuscar.dispatchEvent(new Event('input'));
+                btnVoz.innerHTML = iconoOriginal;
+            };
+            recognition.onend = () => btnVoz.innerHTML = iconoOriginal;
         });
-
-        recognition.onresult = (event) => {
-            const texto = event.results[0][0].transcript.toLowerCase();
-            inputBuscar.value = texto; 
-            filtrarProductos(texto);
-            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-dark"></i>';
-        };
-
-        recognition.onend = () => {
-             btnVoz.innerHTML = '<i class="bi bi-mic-fill text-dark"></i>';
-        };
-    } else {
-        if(btnVoz) btnVoz.style.display = 'none';
     }
 }
 
-// Función auxiliar para filtrar
 function filtrarProductos(texto) {
-    const filtrados = productosGlobales.filter(prod => {
-        const nombre = prod.nombre.toLowerCase();
-        const descripcion = prod.descripcion ? prod.descripcion.toLowerCase() : ''; 
-        return nombre.includes(texto) || descripcion.includes(texto);
-    });
-
+    const filtrados = productosGlobales.filter(prod => 
+        prod.nombre.toLowerCase().includes(texto) || (prod.descripcion && prod.descripcion.toLowerCase().includes(texto))
+    );
     renderizarCatalogo(filtrados);
 }
 
-// --- 6. COOKIES ---
 function checkCookies() {
-    const cookiesAceptadas = localStorage.getItem('cookiesAceptadas');
-    const banner = document.getElementById('aviso-cookies');
-
-    if (!cookiesAceptadas && banner) {
-        banner.style.display = 'block';
+    if (!localStorage.getItem('cookiesAceptadas')) {
+        const modalElement = document.getElementById('cookieModal');
+        const cookieModal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
+        cookieModal.show();
         document.getElementById('btn-aceptar-cookies').addEventListener('click', () => {
             localStorage.setItem('cookiesAceptadas', 'true');
-            banner.style.display = 'none';
+            cookieModal.hide();
         });
     }
 }
