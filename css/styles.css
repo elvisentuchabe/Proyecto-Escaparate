@@ -227,3 +227,32 @@ h1, h2, h3, h4, h5, h6 {
 .btn-close {
     filter: invert(1);
 }
+
+#inputBuscar {
+    width: 350px; /* Antes era automático, ahora forzamos anchura */
+    padding-right: 50px; /* Dejamos espacio hueco a la derecha para el micro */
+}
+
+/* En móviles, que no sea tan ancha para no romper el diseño */
+@media (max-width: 768px) {
+    #inputBuscar {
+        width: 100%; /* En móvil ocupa todo el ancho disponible */
+    }
+}
+
+/* 2. Ocultamos la "X" nativa del navegador que se solapa con el micro */
+#inputBuscar::-webkit-search-decoration,
+#inputBuscar::-webkit-search-cancel-button,
+#inputBuscar::-webkit-search-results-button,
+#inputBuscar::-webkit-search-results-decoration {
+    display: none; 
+    -webkit-appearance: none;
+}
+
+/* 3. Posicionamos el micro perfectamente centrado */
+#btnVoz {
+    right: 5px !important; /* Pegado a la derecha pero con margen */
+    top: 50%;
+    transform: translateY(-50%); /* Centrado vertical exacto */
+    z-index: 10; /* Aseguramos que esté por encima del texto */
+}

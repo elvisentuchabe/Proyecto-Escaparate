@@ -1,34 +1,30 @@
 /**
  * Lógica principal de SportSprint
- * FUSIÓN FINAL: Rendimiento Optimizado + Gestión de Usuarios (WebStorage)
+ * Incluye: Rendimiento, Usuarios, Carrito y BÚSQUEDA POR VOZ (Con espera de 2s)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    cargarUsuarios(); // Cargar usuarios desde WebStorage
+    cargarUsuarios();
     cargarProductos();
     checkSesion();
     inicializarCarrito();
     checkCookies();
     configurarBusqueda();
     configurarLogin();
-    configurarRegister(); // Reactivamos el registro
+    configurarRegister();
 });
 
 const URL_JSON = 'productos.json';
 let productosGlobales = []; 
 let usuarioActual = null; 
-let USUARIOS = []; // Se llenará desde WebStorage
+let USUARIOS = []; 
 
-// --- 1. GESTIÓN DE USUARIOS Y WEBSTORAGE ---
-
+// --- GESTIÓN DE USUARIOS ---
 function cargarUsuarios() {
-    // Intentamos leer del almacenamiento local
     const usuariosGuardados = localStorage.getItem('usuariosDB');
-    
     if (usuariosGuardados) {
         USUARIOS = JSON.parse(usuariosGuardados);
     } else {
-        // Si no hay nada, cargamos los iniciales y los guardamos
         USUARIOS = [
             { user: 'admin', pass: '1234', nombre: 'Administrador' },
             { user: 'cliente', pass: '1234', nombre: 'Cliente Habitual' }
@@ -42,29 +38,25 @@ function configurarRegister() {
     if(formRegister) {
         formRegister.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const nombre = document.getElementById('regNombre').value;
             const user = document.getElementById('regUsuario').value;
             const pass = document.getElementById('regPassword').value;
 
-            // Validar si ya existe
             if (USUARIOS.find(u => u.user === user)) {
                 alert('¡Ese usuario ya existe! Prueba con otro.');
                 return;
             }
 
-            // Crear y Guardar (PERSISTENCIA TOTAL)
             const nuevoUsuario = { user, pass, nombre };
             USUARIOS.push(nuevoUsuario);
             localStorage.setItem('usuariosDB', JSON.stringify(USUARIOS));
 
-            // Cerrar modal y login automático
             const modalRegisterEl = document.getElementById('registerModal');
             const modalRegister = bootstrap.Modal.getInstance(modalRegisterEl);
             modalRegister.hide();
 
             login(user, pass);
-            alert(`¡Cuenta creada y guardada! Bienvenido, ${nombre}.`);
+            alert(`¡Cuenta creada! Bienvenido, ${nombre}.`);
         });
     }
 }
@@ -87,12 +79,10 @@ function login(user, pass) {
         usuarioActual = usuarioEncontrado;
         localStorage.setItem('sesionActiva', JSON.stringify(usuarioActual));
         
-        // Cerrar modales si están abiertos
         const modalLoginEl = document.getElementById('loginModal');
         const modalLogin = bootstrap.Modal.getInstance(modalLoginEl);
         if(modalLogin) modalLogin.hide();
 
-        // Limpiar
         document.getElementById('formLogin').reset();
         document.getElementById('loginError').style.display = 'none';
 
@@ -145,7 +135,7 @@ function actualizarUserUI() {
     }
 }
 
-// --- 2. CARGA DE PRODUCTOS (OPTIMIZADA) ---
+// --- CARGA DE PRODUCTOS ---
 async function cargarProductos() {
     try {
         const response = await fetch(URL_JSON);
@@ -172,7 +162,6 @@ function renderizarCarrusel(productos) {
     let html = '';
     destacados.forEach((prod, index) => {
         const activeClass = index === 0 ? 'active' : ''; 
-        // Optimización LCP
         const loadingAttr = index === 0 ? 'eager' : 'lazy';
         const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
         
@@ -226,7 +215,6 @@ function renderizarCatalogo(productos) {
     contenedor.innerHTML = html;
 }
 
-// --- VISTA DETALLE ---
 function verDetalle(id) {
     const producto = productosGlobales.find(p => p.id === id);
     if (!producto) return;
@@ -268,7 +256,6 @@ function volverAlCatalogo() {
     document.getElementById('seccion-catalogo').style.display = 'block';
 }
 
-// --- CARRITO ---
 function obtenerClaveCarrito() {
     return usuarioActual ? `carrito_${usuarioActual.user}` : 'carrito_invitado';
 }
@@ -326,18 +313,20 @@ function actualizarCarritoUI() {
     }
 }
 
-// --- BUSCADOR Y COOKIES ---
+// --- BÚSQUEDA Y VOZ (CON TEMPORIZADOR DE SILENCIO) ---
 function configurarBusqueda() {
     const inputBuscar = document.getElementById('inputBuscar');
     const btnVoz = document.getElementById('btnVoz');
     const botonesFiltro = document.querySelectorAll('.filter-btn');
 
+    // 1. Filtrado por teclado
     inputBuscar.addEventListener('input', (e) => {
         const texto = e.target.value.toLowerCase();
         if (document.getElementById('seccion-detalle').style.display === 'block') volverAlCatalogo();
         filtrarProductos(texto);
     });
 
+    // 2. Filtrado por botones
     botonesFiltro.forEach(btn => {
         btn.addEventListener('click', (e) => {
             volverAlCatalogo();
@@ -350,21 +339,67 @@ function configurarBusqueda() {
         });
     });
 
-    if (btnVoz) {
+    // 3. LÓGICA DE VOZ MEJORADA (Espera 2s de silencio)
+    if (btnVoz && inputBuscar) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            console.warn("Navegador sin soporte de voz.");
+            btnVoz.style.display = 'none';
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = true; 
+        recognition.interimResults = true;
+
+        let temporizadorSilencio;
+
         btnVoz.addEventListener('click', () => {
-            if (!('webkitSpeechRecognition' in window)) { alert("Navegador no compatible."); return; }
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = 'es-ES';
-            recognition.start();
-            const iconoOriginal = btnVoz.innerHTML;
-            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
-            recognition.onresult = (e) => {
-                inputBuscar.value = e.results[0][0].transcript;
-                inputBuscar.dispatchEvent(new Event('input'));
-                btnVoz.innerHTML = iconoOriginal;
-            };
-            recognition.onend = () => btnVoz.innerHTML = iconoOriginal;
+            try {
+                recognition.start();
+            } catch (error) {
+                console.log("Ya activo");
+            }
         });
+
+        recognition.onstart = () => {
+            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
+            inputBuscar.placeholder = "Escuchando...";
+            inputBuscar.value = '';
+        };
+
+        recognition.onend = () => {
+            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-white"></i>';
+            inputBuscar.placeholder = "Buscar productos...";
+            clearTimeout(temporizadorSilencio);
+            inputBuscar.dispatchEvent(new Event('input'));
+        };
+
+        recognition.onresult = (event) => {
+            clearTimeout(temporizadorSilencio);
+
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+            
+            inputBuscar.value = transcript;
+            
+            inputBuscar.dispatchEvent(new Event('input'));
+
+            temporizadorSilencio = setTimeout(() => {
+                recognition.stop();
+            }, 2000);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Error voz:", event.error);
+            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-white"></i>';
+            if (event.error === 'not-allowed') {
+                alert("Permite el micrófono para usar la voz.");
+            }
+        };
     }
 }
 
