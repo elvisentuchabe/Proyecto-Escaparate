@@ -1,5 +1,5 @@
 /**
- * Lógica principal de SportSprint - OPTIMIZADA
+ * Lógica principal de SportSprint - CORREGIDA
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,7 +19,7 @@ const USUARIOS = [
     { user: 'cliente', pass: '1234', nombre: 'Cliente Habitual' }
 ];
 
-// ... (Las funciones de Login, Logout, checkSesion y actualizarUserUI se mantienen IGUAL) ...
+// --- GESTIÓN DE USUARIOS ---
 function configurarLogin() {
     const formLogin = document.getElementById('formLogin');
     if(formLogin) {
@@ -86,11 +86,11 @@ function actualizarUserUI() {
     }
 }
 
-// --- CARGA DE PRODUCTOS OPTIMIZADA ---
+// --- CARGA DE PRODUCTOS ---
 async function cargarProductos() {
     try {
         const response = await fetch(URL_JSON);
-        if (!response.ok) throw new Error("Error");
+        if (!response.ok) throw new Error("Error al cargar JSON");
         productosGlobales = await response.json();
         
         const visitasLocales = JSON.parse(localStorage.getItem('contadorVisitas')) || {};
@@ -100,27 +100,39 @@ async function cargarProductos() {
 
         renderizarCarrusel(productosGlobales);
         renderizarCatalogo(productosGlobales);
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+        console.error("Error cargando productos:", error);
+        document.getElementById('contenedor-productos').innerHTML = 
+            `<div class="col-12 text-center text-danger mt-5">Error cargando catálogo. Revisa la consola (F12).</div>`;
+    }
 }
 
 function renderizarCarrusel(productos) {
     const contenedor = document.getElementById('contenedor-carrusel');
     if (!contenedor) return;
+    
     const destacados = [...productos].sort((a, b) => b.visitas - a.visitas).slice(0, 3);
     
     let html = '';
     destacados.forEach((prod, index) => {
         const activeClass = index === 0 ? 'active' : ''; 
-        // LCP OPTIMIZACIÓN: La primera imagen es 'eager' (carga urgente), las demás pueden esperar
+        
+        // --- AQUÍ ESTABA EL ERROR: Definimos las variables antes de usarlas ---
         const loadingAttr = index === 0 ? 'eager' : 'lazy';
-        const priorityAttr = index === 0 ? 'fetchpriority="high"' : ''; // NUEVO
+        const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
         
         html += `
-    <div class="carousel-item ${activeClass}">
-        <img src="${prod.imagen}" class="d-block w-100" alt="${prod.nombre}" 
-             style="cursor: pointer" onclick="verDetalle(${prod.id})"
-             width="1200" height="450" loading="${loadingAttr}" ${priorityAttr}> 
-        ```;
+            <div class="carousel-item ${activeClass}">
+                <img src="${prod.imagen}" class="d-block w-100" alt="${prod.nombre}" 
+                     style="cursor: pointer" onclick="verDetalle(${prod.id})"
+                     width="1200" height="450" loading="${loadingAttr}" ${priorityAttr}> 
+                <div class="carousel-caption d-none d-md-block">
+                    <h5 class="display-6 fw-bold text-uppercase text-primary">TOP VENTAS</h5>
+                    <h3 class="text-white">${prod.nombre}</h3>
+                    <p class="fs-5 text-white">${prod.precio} €</p>
+                    <button class="btn btn-primary fw-bold" onclick="agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">LO QUIERO</button>
+                </div>
+            </div>`;
     });
     contenedor.innerHTML = html;
 }
@@ -136,9 +148,6 @@ function renderizarCatalogo(productos) {
 
     let html = '';
     productos.forEach(prod => {
-        // PERFORMANCE: 
-        // 1. loading="lazy": Solo carga la imagen cuando haces scroll y llegas a ella.
-        // 2. width/height: Reserva el espacio para evitar saltos (CLS).
         html += `
             <div class="col">
                 <div class="card h-100 card-producto shadow-sm">
@@ -165,7 +174,7 @@ function renderizarCatalogo(productos) {
     contenedor.innerHTML = html;
 }
 
-// ... (El resto de funciones: verDetalle, carrito, búsqueda, cookies se mantienen IGUAL) ...
+// --- VISTA DETALLE ---
 function verDetalle(id) {
     const producto = productosGlobales.find(p => p.id === id);
     if (!producto) return;
@@ -207,6 +216,7 @@ function volverAlCatalogo() {
     document.getElementById('seccion-catalogo').style.display = 'block';
 }
 
+// --- CARRITO ---
 function obtenerClaveCarrito() {
     return usuarioActual ? `carrito_${usuarioActual.user}` : 'carrito_invitado';
 }
@@ -264,6 +274,7 @@ function actualizarCarritoUI() {
     }
 }
 
+// --- BUSCADOR Y COOKIES ---
 function configurarBusqueda() {
     const inputBuscar = document.getElementById('inputBuscar');
     const btnVoz = document.getElementById('btnVoz');
