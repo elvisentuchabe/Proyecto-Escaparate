@@ -1,25 +1,74 @@
 /**
- * Lógica principal de SportSprint - CORREGIDA
+ * Lógica principal de SportSprint
+ * FUSIÓN FINAL: Rendimiento Optimizado + Gestión de Usuarios (WebStorage)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    cargarUsuarios(); // Cargar usuarios desde WebStorage
     cargarProductos();
     checkSesion();
     inicializarCarrito();
     checkCookies();
     configurarBusqueda();
     configurarLogin();
+    configurarRegister(); // Reactivamos el registro
 });
 
 const URL_JSON = 'productos.json';
 let productosGlobales = []; 
 let usuarioActual = null; 
-const USUARIOS = [
-    { user: 'admin', pass: '1234', nombre: 'Administrador' },
-    { user: 'cliente', pass: '1234', nombre: 'Cliente Habitual' }
-];
+let USUARIOS = []; // Se llenará desde WebStorage
 
-// --- GESTIÓN DE USUARIOS ---
+// --- 1. GESTIÓN DE USUARIOS Y WEBSTORAGE ---
+
+function cargarUsuarios() {
+    // Intentamos leer del almacenamiento local
+    const usuariosGuardados = localStorage.getItem('usuariosDB');
+    
+    if (usuariosGuardados) {
+        USUARIOS = JSON.parse(usuariosGuardados);
+    } else {
+        // Si no hay nada, cargamos los iniciales y los guardamos
+        USUARIOS = [
+            { user: 'admin', pass: '1234', nombre: 'Administrador' },
+            { user: 'cliente', pass: '1234', nombre: 'Cliente Habitual' }
+        ];
+        localStorage.setItem('usuariosDB', JSON.stringify(USUARIOS));
+    }
+}
+
+function configurarRegister() {
+    const formRegister = document.getElementById('formRegister');
+    if(formRegister) {
+        formRegister.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById('regNombre').value;
+            const user = document.getElementById('regUsuario').value;
+            const pass = document.getElementById('regPassword').value;
+
+            // Validar si ya existe
+            if (USUARIOS.find(u => u.user === user)) {
+                alert('¡Ese usuario ya existe! Prueba con otro.');
+                return;
+            }
+
+            // Crear y Guardar (PERSISTENCIA TOTAL)
+            const nuevoUsuario = { user, pass, nombre };
+            USUARIOS.push(nuevoUsuario);
+            localStorage.setItem('usuariosDB', JSON.stringify(USUARIOS));
+
+            // Cerrar modal y login automático
+            const modalRegisterEl = document.getElementById('registerModal');
+            const modalRegister = bootstrap.Modal.getInstance(modalRegisterEl);
+            modalRegister.hide();
+
+            login(user, pass);
+            alert(`¡Cuenta creada y guardada! Bienvenido, ${nombre}.`);
+        });
+    }
+}
+
 function configurarLogin() {
     const formLogin = document.getElementById('formLogin');
     if(formLogin) {
@@ -37,11 +86,16 @@ function login(user, pass) {
     if (usuarioEncontrado) {
         usuarioActual = usuarioEncontrado;
         localStorage.setItem('sesionActiva', JSON.stringify(usuarioActual));
-        const modalEl = document.getElementById('loginModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        
+        // Cerrar modales si están abiertos
+        const modalLoginEl = document.getElementById('loginModal');
+        const modalLogin = bootstrap.Modal.getInstance(modalLoginEl);
+        if(modalLogin) modalLogin.hide();
+
+        // Limpiar
         document.getElementById('formLogin').reset();
         document.getElementById('loginError').style.display = 'none';
+
         actualizarUserUI();
         actualizarCarritoUI();
     } else {
@@ -79,14 +133,19 @@ function actualizarUserUI() {
         `;
     } else {
         container.innerHTML = `
-            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
-                INICIAR SESIÓN
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    ENTRAR
+                </button>
+                <button class="btn btn-primary btn-sm fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#registerModal">
+                    REGISTRARSE
+                </button>
+            </div>
         `;
     }
 }
 
-// --- CARGA DE PRODUCTOS ---
+// --- 2. CARGA DE PRODUCTOS (OPTIMIZADA) ---
 async function cargarProductos() {
     try {
         const response = await fetch(URL_JSON);
@@ -101,23 +160,19 @@ async function cargarProductos() {
         renderizarCarrusel(productosGlobales);
         renderizarCatalogo(productosGlobales);
     } catch (error) { 
-        console.error("Error cargando productos:", error);
-        document.getElementById('contenedor-productos').innerHTML = 
-            `<div class="col-12 text-center text-danger mt-5">Error cargando catálogo. Revisa la consola (F12).</div>`;
+        console.error("Error:", error);
     }
 }
 
 function renderizarCarrusel(productos) {
     const contenedor = document.getElementById('contenedor-carrusel');
     if (!contenedor) return;
-    
     const destacados = [...productos].sort((a, b) => b.visitas - a.visitas).slice(0, 3);
     
     let html = '';
     destacados.forEach((prod, index) => {
         const activeClass = index === 0 ? 'active' : ''; 
-        
-        // --- AQUÍ ESTABA EL ERROR: Definimos las variables antes de usarlas ---
+        // Optimización LCP
         const loadingAttr = index === 0 ? 'eager' : 'lazy';
         const priorityAttr = index === 0 ? 'fetchpriority="high"' : '';
         
@@ -140,20 +195,17 @@ function renderizarCarrusel(productos) {
 function renderizarCatalogo(productos) {
     const contenedor = document.getElementById('contenedor-productos');
     if (!contenedor) return;
-    
     if (productos.length === 0) {
         contenedor.innerHTML = `<div class="col-12 text-center mt-5"><h3 class="text-white">No hay productos.</h3></div>`;
         return;
     }
-
     let html = '';
     productos.forEach(prod => {
         html += `
             <div class="col">
                 <div class="card h-100 card-producto shadow-sm">
                     <div class="position-relative" style="cursor: pointer;" onclick="verDetalle(${prod.id})">
-                        <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}"
-                             loading="lazy" width="300" height="250">
+                        <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}" loading="lazy" width="300" height="250">
                         <div class="descripcion-overlay flex-column">
                              <i class="bi bi-cart-plus-fill display-3 icono-hover mb-2"></i>
                              <span class="btn btn-sm btn-outline-light rounded-pill px-3">VER DETALLES</span>
