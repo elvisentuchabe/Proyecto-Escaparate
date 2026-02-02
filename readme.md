@@ -8,8 +8,7 @@ Este proyecto no requiere instalación de dependencias ni bases de datos (Backen
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/tu-usuario/sport-sprint.git](https://github.com/tu-usuario/sport-sprint.git)
-    ```
+    git clone https://github.com/elvisentuchabe/Proyecto-Escaparate.git
 
 2.  **⚠️ IMPORTANTE: Instalar Imágenes:**
     * El repositorio contiene un archivo comprimido llamado **`img.zip`** (o `imagenes.zip`).
@@ -18,8 +17,7 @@ Este proyecto no requiere instalación de dependencias ni bases de datos (Backen
     * *Sin este paso, no se cargarán las fotos de los productos.*
 
 3.  **Ejecutar:**
-    * Opción A: Abrir el archivo `index.html` directamente en cualquier navegador moderno.
-    * Opción B (Recomendada): Usar un servidor local (ej: *Live Server* en VSCode) para evitar problemas de CORS con la carga del JSON y los módulos de voz.
+    * Usar un servidor local (ej: *Live Server* en VSCode) para evitar problemas con la carga del JSON y los módulos de voz.
 
 ## 👤 Usuarios de Prueba
 
@@ -79,4 +77,4 @@ Todas las imágenes utilizadas son de uso libre (Creative Commons / Licencia Pix
 | *Resto de catálogo* | **IA (Google Gemini)** | Generado por IA (Uso Libre) |
 
 ---
-**Desarrollado por [Tu Nombre] para [Nombre de la Asignatura/Módulo]**
+**Desarrollado por Vicente Romero Sáiz para los módulos DWEC y DIW**
