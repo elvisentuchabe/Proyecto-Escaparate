@@ -92,15 +92,16 @@
                     <p class="small text-muted">Tu tienda especialista en rendimiento deportivo.</p>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <h5 class="text-uppercase text-primary">Enlaces</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="aviso-legal.html" class="text-muted text-decoration-none hover-white">Aviso Legal</a></li>                        <li><a href="licencias.html" class="text-white-50 text-decoration-none">Licencias Multimedia</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <h5 class="text-uppercase text-primary">Contacto</h5>
-                    <p class="small mb-0 text-muted">info@sportsprint.com</p>
-                </div>
+                <h5 class="text-uppercase text-primary">Enlaces</h5>
+                <ul class="list-unstyled">
+                    <li><a href="licencias.html" class="text-muted text-decoration-none hover-white">Licencias Multimedia</a></li>
+                    <li><a href="aviso-legal.html" class="text-muted text-decoration-none hover-white">Aviso Legal</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5 class="text-uppercase text-primary">Contacto</h5>
+                <p class="small mb-2 text-muted">info@sportsprint.com</p>
+                <div id="geo-info" class="text-info small"><i class="bi bi-geo-alt"></i> Localizando...</div>
             </div>
         </div>
     </footer>
@@ -167,22 +168,21 @@
                     <form id="formRegister">
                         <div class="mb-3">
                             <label class="form-label text-white">Nombre Completo</label>
-                            <input type="text" class="form-control" id="regNombre" placeholder="Ej: Juan Pérez" required>
+                            <input type="text" class="form-control" id="regNombre" placeholder="Ej: Juan Pérez" 
+                                required pattern="[a-zA-Z\s]{3,30}" title="Solo letras y espacios">
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-white">Usuario</label>
-                            <input type="text" class="form-control" id="regUsuario" placeholder="Elige un usuario" required>
+                            <input type="text" class="form-control" id="regUsuario" placeholder="Usuario" 
+                                required pattern="[a-zA-Z0-9]{4,12}" title="4 a 12 caracteres alfanuméricos">
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-white">Contraseña</label>
-                            <input type="password" class="form-control" id="regPassword" placeholder="Mínimo 4 caracteres" required minlength="4">
+                            <input type="password" class="form-control" id="regPassword" placeholder="Mínimo 6 caracteres" 
+                                required pattern=".{6,}" title="Mínimo 6 caracteres">
                         </div>
                         <div class="d-grid mb-3">
                             <button type="submit" class="btn btn-primary fw-bold">REGISTRARSE</button>
-                        </div>
-                        <div class="text-center">
-                            <small class="text-muted">¿Ya tienes cuenta?</small>
-                            <a href="#" class="text-primary text-decoration-none fw-bold ms-1" data-bs-toggle="modal" data-bs-target="#loginModal">Inicia Sesión</a>
                         </div>
                     </form>
                 </div>

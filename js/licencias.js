@@ -40,10 +40,10 @@ const DATOS_LICENCIAS = [
     },
     {
         archivo: "saucony_running_shoe.jpg", 
-        autor: "Karldmartini",
-        origen: "Wikimedia Commons",
-        licencia: "CC BY-SA 4.1",
-        link: "https://commons.wikimedia.org/wiki/File:Saucony_shoe_animation.gif"
+        autor: "IA (Google Gemini)",
+        origen: "Generado por IA",
+        licencia: "Uso libre",
+        link: "Prompt: Genera una imagen para un escaparate virtual de unas zapatillas de correr con el estilo de las zapatillas de la marca Saucony. No quiero que aparezca ninguna marca."
     },
     {
         archivo: "new_balance_running_shoe.jpg",

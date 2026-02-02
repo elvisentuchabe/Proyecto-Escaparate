@@ -1,6 +1,6 @@
 /**
  * Lógica principal de SportSprint
- * Incluye: Rendimiento, Usuarios, Carrito y BÚSQUEDA POR VOZ (Con espera de 2s)
+ * Incluye: Rendimiento, Usuarios, Carrito, Voz, Cookies y GEOLOCALIZACIÓN AVANZADA
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,12 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarBusqueda();
     configurarLogin();
     configurarRegister();
+    initGeolocalizacion(); // Inicia el cálculo de distancia
 });
 
 const URL_JSON = 'productos.json';
 let productosGlobales = []; 
 let usuarioActual = null; 
 let USUARIOS = []; 
+
+// Coordenadas de Deportes Moya (Av. del Mediterráneo, 26, Madrid)
+const TIENDA_COORDS = { lat: 40.406328, lon: -3.677567 };
 
 // --- GESTIÓN DE USUARIOS ---
 function cargarUsuarios() {
@@ -43,7 +47,7 @@ function configurarRegister() {
             const pass = document.getElementById('regPassword').value;
 
             if (USUARIOS.find(u => u.user === user)) {
-                alert('¡Ese usuario ya existe! Prueba con otro.');
+                mostrarNotificacion('¡Ese usuario ya existe!', 'error');
                 return;
             }
 
@@ -56,7 +60,7 @@ function configurarRegister() {
             modalRegister.hide();
 
             login(user, pass);
-            alert(`¡Cuenta creada! Bienvenido, ${nombre}.`);
+            mostrarNotificacion(`¡Bienvenido a SportSprint, ${nombre}!`, 'success');
         });
     }
 }
@@ -88,6 +92,7 @@ function login(user, pass) {
 
         actualizarUserUI();
         actualizarCarritoUI();
+        mostrarNotificacion(`Hola de nuevo, ${usuarioActual.nombre}`, 'success');
     } else {
         document.getElementById('loginError').style.display = 'block';
     }
@@ -98,6 +103,7 @@ function logout() {
     localStorage.removeItem('sesionActiva');
     actualizarUserUI();
     actualizarCarritoUI();
+    mostrarNotificacion("Sesión cerrada correctamente", "success");
 }
 
 function checkSesion() {
@@ -188,13 +194,29 @@ function renderizarCatalogo(productos) {
         contenedor.innerHTML = `<div class="col-12 text-center mt-5"><h3 class="text-white">No hay productos.</h3></div>`;
         return;
     }
+    
+    // Recuperamos favoritos para pintar corazones
+    const claveFav = usuarioActual ? `fav_${usuarioActual.user}` : 'fav_invitado';
+    const favoritos = JSON.parse(localStorage.getItem(claveFav)) || [];
+
     let html = '';
     productos.forEach(prod => {
+        const esFav = favoritos.includes(prod.id);
+        const iconoFav = esFav ? 'bi-heart-fill' : 'bi-heart';
+        const claseActive = esFav ? 'active' : '';
+
         html += `
             <div class="col">
                 <div class="card h-100 card-producto shadow-sm">
                     <div class="position-relative" style="cursor: pointer;" onclick="verDetalle(${prod.id})">
                         <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}" loading="lazy" width="300" height="250">
+                        
+                        <button id="btn-fav-${prod.id}" 
+                                class="btn btn-fav position-absolute top-0 end-0 m-2 text-white ${claseActive}"
+                                onclick="event.stopPropagation(); toggleFavorito(${prod.id})">
+                            <i class="bi ${iconoFav}"></i>
+                        </button>
+
                         <div class="descripcion-overlay flex-column">
                              <i class="bi bi-cart-plus-fill display-3 icono-hover mb-2"></i>
                              <span class="btn btn-sm btn-outline-light rounded-pill px-3">VER DETALLES</span>
@@ -256,16 +278,25 @@ function volverAlCatalogo() {
     document.getElementById('seccion-catalogo').style.display = 'block';
 }
 
+// --- CARRITO (PROTEGIDO) ---
 function obtenerClaveCarrito() {
     return usuarioActual ? `carrito_${usuarioActual.user}` : 'carrito_invitado';
 }
 
 function agregarAlCarrito(id, nombre, precio, imagen) {
+    if (!usuarioActual) {
+        mostrarNotificacion("Debes iniciar sesión para comprar", "error");
+        const modalLogin = new bootstrap.Modal(document.getElementById('loginModal'));
+        modalLogin.show();
+        return;
+    }
+
     const clave = obtenerClaveCarrito();
     let carrito = JSON.parse(localStorage.getItem(clave)) || [];
     carrito.push({ id, nombre, precio, imagen });
     localStorage.setItem(clave, JSON.stringify(carrito));
     actualizarCarritoUI();
+    mostrarNotificacion("Producto añadido a la cesta", "success");
 }
 
 function eliminarDelCarrito(index) {
@@ -274,6 +305,7 @@ function eliminarDelCarrito(index) {
     carrito.splice(index, 1);
     localStorage.setItem(clave, JSON.stringify(carrito));
     actualizarCarritoUI();
+    mostrarNotificacion("Producto eliminado", "error");
 }
 
 function inicializarCarrito() { actualizarCarritoUI(); }
@@ -313,20 +345,18 @@ function actualizarCarritoUI() {
     }
 }
 
-// --- BÚSQUEDA Y VOZ (CON TEMPORIZADOR DE SILENCIO) ---
+// --- BÚSQUEDA Y VOZ ---
 function configurarBusqueda() {
     const inputBuscar = document.getElementById('inputBuscar');
     const btnVoz = document.getElementById('btnVoz');
     const botonesFiltro = document.querySelectorAll('.filter-btn');
 
-    // 1. Filtrado por teclado
     inputBuscar.addEventListener('input', (e) => {
         const texto = e.target.value.toLowerCase();
         if (document.getElementById('seccion-detalle').style.display === 'block') volverAlCatalogo();
         filtrarProductos(texto);
     });
 
-    // 2. Filtrado por botones
     botonesFiltro.forEach(btn => {
         btn.addEventListener('click', (e) => {
             volverAlCatalogo();
@@ -339,12 +369,9 @@ function configurarBusqueda() {
         });
     });
 
-    // 3. LÓGICA DE VOZ MEJORADA (Espera 2s de silencio)
     if (btnVoz && inputBuscar) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
         if (!SpeechRecognition) {
-            console.warn("Navegador sin soporte de voz.");
             btnVoz.style.display = 'none';
             return;
         }
@@ -353,20 +380,15 @@ function configurarBusqueda() {
         recognition.lang = 'es-ES';
         recognition.continuous = true; 
         recognition.interimResults = true;
-
         let temporizadorSilencio;
 
         btnVoz.addEventListener('click', () => {
-            try {
-                recognition.start();
-            } catch (error) {
-                console.log("Ya activo");
-            }
+            try { recognition.start(); } catch (error) { console.log("Ya activo"); }
         });
 
         recognition.onstart = () => {
             btnVoz.innerHTML = '<i class="bi bi-mic-fill text-danger"></i>';
-            inputBuscar.placeholder = "Escuchando...";
+            inputBuscar.placeholder = "Escuchando... (Espera 2s)";
             inputBuscar.value = '';
         };
 
@@ -379,26 +401,10 @@ function configurarBusqueda() {
 
         recognition.onresult = (event) => {
             clearTimeout(temporizadorSilencio);
-
-            const transcript = Array.from(event.results)
-                .map(result => result[0].transcript)
-                .join('');
-            
+            const transcript = Array.from(event.results).map(result => result[0].transcript).join('');
             inputBuscar.value = transcript;
-            
             inputBuscar.dispatchEvent(new Event('input'));
-
-            temporizadorSilencio = setTimeout(() => {
-                recognition.stop();
-            }, 2000);
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Error voz:", event.error);
-            btnVoz.innerHTML = '<i class="bi bi-mic-fill text-white"></i>';
-            if (event.error === 'not-allowed') {
-                alert("Permite el micrófono para usar la voz.");
-            }
+            temporizadorSilencio = setTimeout(() => { recognition.stop(); }, 2000);
         };
     }
 }
@@ -410,14 +416,117 @@ function filtrarProductos(texto) {
     renderizarCatalogo(filtrados);
 }
 
+// --- FAVORITOS Y NOTIFICACIONES ---
+function mostrarNotificacion(mensaje, tipo = 'success') {
+    const contenedor = document.querySelector('.toast-container');
+    if(!contenedor) return;
+    const colorHeader = tipo === 'success' ? 'bg-success' : 'bg-danger';
+    const icono = tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+    const html = `
+        <div class="toast show align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header ${colorHeader} text-white">
+                <i class="bi ${icono} me-2"></i>
+                <strong class="me-auto">SportSprint</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body text-dark">
+                ${mensaje}
+            </div>
+        </div>
+    `;
+    const toastElement = document.createElement('div');
+    toastElement.innerHTML = html;
+    contenedor.appendChild(toastElement.firstElementChild);
+    setTimeout(() => { 
+        const toast = contenedor.lastElementChild;
+        if (toast) toast.remove();
+    }, 3000);
+}
+
+function toggleFavorito(id) {
+    const claveFav = usuarioActual ? `fav_${usuarioActual.user}` : 'fav_invitado';
+    let favoritos = JSON.parse(localStorage.getItem(claveFav)) || [];
+    
+    const index = favoritos.indexOf(id);
+    if (index === -1) {
+        favoritos.push(id);
+        mostrarNotificacion("Añadido a favoritos", "success");
+    } else {
+        favoritos.splice(index, 1);
+        mostrarNotificacion("Eliminado de favoritos", "error");
+    }
+    
+    localStorage.setItem(claveFav, JSON.stringify(favoritos));
+    
+    const btn = document.getElementById(`btn-fav-${id}`);
+    if(btn) {
+        btn.classList.toggle('active');
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('bi-heart');
+        icon.classList.toggle('bi-heart-fill');
+    }
+}
+
+// --- COOKIES REALES (BOM) ---
 function checkCookies() {
-    if (!localStorage.getItem('cookiesAceptadas')) {
+    if (!document.cookie.includes("aceptar_cookies=true")) {
         const modalElement = document.getElementById('cookieModal');
         const cookieModal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
         cookieModal.show();
+        
         document.getElementById('btn-aceptar-cookies').addEventListener('click', () => {
-            localStorage.setItem('cookiesAceptadas', 'true');
+            // Guardamos Cookie BOM con path y hostname
+            const datos = `host=${window.location.hostname}|path=${window.location.pathname}`;
+            const fecha = new Date();
+            fecha.setTime(fecha.getTime() + (365*24*60*60*1000));
+            
+            document.cookie = `aceptar_cookies=true; expires=${fecha.toUTCString()}; path=/`;
+            document.cookie = `info_ubicacion=${datos}; expires=${fecha.toUTCString()}; path=/`;
+            
             cookieModal.hide();
         });
     }
+}
+
+// --- GEOLOCALIZACIÓN Y DISTANCIA ---
+function initGeolocalizacion() {
+    const geoDiv = document.getElementById('geo-info');
+    if (!geoDiv) return;
+
+    if ("geolocation" in navigator) {
+        geoDiv.innerHTML = `<i class="bi bi-geo-alt"></i> Localizando...`;
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+                
+                // Calcular distancia a Deportes Moya (nuestra tienda)
+                const distKM = calcularDistanciaKM(userLat, userLon, TIENDA_COORDS.lat, TIENDA_COORDS.lon);
+                
+                geoDiv.innerHTML = `
+                    <i class="bi bi-geo-alt-fill text-primary"></i> 
+                    Estás a <b>${distKM} km</b> de nuestra tienda
+                `;
+            },
+            (error) => {
+                geoDiv.innerHTML = `<i class="bi bi-geo-alt"></i> Ubicación no permitida`;
+                console.warn("Error geo:", error.message);
+            }
+        );
+    } else {
+        geoDiv.style.display = 'none';
+    }
+}
+
+// Fórmula de Haversine para distancia en KM
+function calcularDistanciaKM(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio Tierra km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(1); // Devolver con 1 decimal
 }
