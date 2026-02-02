@@ -11,7 +11,7 @@ Este proyecto no requiere instalación de dependencias ni bases de datos (Backen
     git clone https://github.com/elvisentuchabe/Proyecto-Escaparate.git
 
 2.  **⚠️ IMPORTANTE: Instalar Imágenes:**
-    * El repositorio contiene un archivo comprimido llamado **`img.zip`** (o `imagenes.zip`).
+    * El repositorio contiene un archivo comprimido llamado **`img.zip`**.
     * **Descomprímelo** en la raíz del proyecto (al mismo nivel que `index.html`).
     * Asegúrate de que la carpeta resultante se llame **`img`** y contenga todas las fotos (`.jpg`).
     * *Sin este paso, no se cargarán las fotos de los productos.*
