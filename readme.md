@@ -68,7 +68,6 @@ Todas las imágenes utilizadas son de uso libre (Creative Commons / Licencia Pix
 | `asics_running_shoe.jpg` | Hans (Pixabay) | Pixabay License |
 | `hoka_running_shoe.jpg` | Photographer2575 (Pixabay) | Pixabay License |
 | `brooks_running_shoe.jpg` | Ssu (Wikimedia) | CC BY-SA 4.0 |
-| `saucony_running_shoe.jpg` | Karldmartini (Wikimedia) | CC BY-SA 4.1 |
 | `new_balance_running_shoe.jpg`| Licht-aus (Pixabay) | Pixabay License |
 | `mizuno_running_shoe.jpg` | Ssu (Wikimedia) | CC BY-SA 4.0 |
 | `sports_watch.jpg` | indraprojects (Pixabay) | Pixabay License |
