@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarBusqueda();
     configurarLogin();
     configurarRegister();
-    initGeolocalizacion(); // Inicia el cálculo de distancia
+    initGeolocalizacion();
 });
 
 const URL_JSON = 'productos.json';
@@ -211,24 +211,31 @@ function renderizarCatalogo(productos) {
                     <div class="position-relative" style="cursor: pointer;" onclick="verDetalle(${prod.id})">
                         <img src="${prod.imagen}" class="card-img-top" alt="${prod.nombre}" loading="lazy" width="300" height="250">
                         
-                        <button id="btn-fav-${prod.id}" 
-                                class="btn btn-fav position-absolute top-0 end-0 m-2 text-white ${claseActive}"
-                                onclick="event.stopPropagation(); toggleFavorito(${prod.id})">
-                            <i class="bi ${iconoFav}"></i>
-                        </button>
-
                         <div class="descripcion-overlay flex-column">
                              <i class="bi bi-cart-plus-fill display-3 icono-hover mb-2"></i>
                              <span class="btn btn-sm btn-outline-light rounded-pill px-3">VER DETALLES</span>
                         </div>
                     </div>
+
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fs-6 fw-bold text-white text-truncate">${prod.nombre}</h5>
+                        
                         <div class="mt-auto d-flex justify-content-between align-items-center">
                             <span class="text-primary fw-bold fs-5">${prod.precio} €</span>
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">
-                                <i class="bi bi-plus-lg"></i> AÑADIR
-                            </button>
+                            
+                            <div class="d-flex align-items-center gap-2">
+                                <button id="btn-fav-${prod.id}" 
+                                        class="btn btn-fav text-white ${claseActive}"
+                                        style="width: 32px; height: 32px; font-size: 0.8rem;" 
+                                        onclick="event.stopPropagation(); toggleFavorito(${prod.id})"
+                                        title="Añadir a favoritos">
+                                    <i class="bi ${iconoFav}"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); agregarAlCarrito(${prod.id}, '${prod.nombre}', ${prod.precio}, '${prod.imagen}')">
+                                    <i class="bi bi-plus-lg"></i> AÑADIR
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,7 +285,7 @@ function volverAlCatalogo() {
     document.getElementById('seccion-catalogo').style.display = 'block';
 }
 
-// --- CARRITO (PROTEGIDO) ---
+// --- CARRITO ---
 function obtenerClaveCarrito() {
     return usuarioActual ? `carrito_${usuarioActual.user}` : 'carrito_invitado';
 }
@@ -468,7 +475,7 @@ function toggleFavorito(id) {
     }
 }
 
-// --- COOKIES REALES (BOM) ---
+// --- COOKIES (BOM) ---
 function checkCookies() {
     if (!document.cookie.includes("aceptar_cookies=true")) {
         const modalElement = document.getElementById('cookieModal');

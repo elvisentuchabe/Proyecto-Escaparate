@@ -1,6 +1,5 @@
-/* --- SISTEMA DE DISEÑO (Cyber-Sport High Contrast) --- */
+/* --- SISTEMA DE DISEÑO --- */
 :root {
-    /* Paleta de Colores */
     --color-bg: #121212;
     --color-card: #1e1e1e;
     --color-primary: #00f3ff;
@@ -8,10 +7,8 @@
     --color-text: #ffffff;
     --color-text-muted: #b0b0b0;
     
-    /* Tipografía */
     --font-tech: 'Rajdhani', sans-serif;
     
-    /* Efectos */
     --neon-glow: 0 0 12px rgba(0, 243, 255, 0.6);
 }
 
@@ -229,7 +226,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 #inputBuscar {
-    width: 350px; /* Antes era automático, ahora forzamos anchura */
+    width: 350px; /* Forzamos anchura */
     padding-right: 50px; /* Dejamos espacio hueco a la derecha para el micro */
 }
 
@@ -240,7 +237,6 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* 2. Ocultamos la "X" nativa del navegador que se solapa con el micro */
 #inputBuscar::-webkit-search-decoration,
 #inputBuscar::-webkit-search-cancel-button,
 #inputBuscar::-webkit-search-results-button,
@@ -249,10 +245,32 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-appearance: none;
 }
 
-/* 3. Posicionamos el micro perfectamente centrado */
 #btnVoz {
     right: 5px !important; /* Pegado a la derecha pero con margen */
     top: 50%;
     transform: translateY(-50%); /* Centrado vertical exacto */
     z-index: 10; /* Aseguramos que esté por encima del texto */
+}
+
+/* --- CORRECCIÓN BOTÓN FAVORITOS --- */
+.btn-fav {
+    border: none !important;
+    background: transparent !important;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    box-shadow: none !important;
+}
+
+.btn-fav:hover {
+    transform: scale(1.3);
+    background: transparent;
+}
+
+.btn-fav:focus, .btn-fav:active {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
