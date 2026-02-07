@@ -4,7 +4,7 @@ Proyecto de escaparate virtual para una tienda de deportes (Running & Ciclismo),
 
 ## 🚀 Instalación y Despliegue
 
-Este proyecto no requiere instalación de dependencias ni bases de datos (Backendless). Sigue estos pasos para ponerlo en marcha:
+Sigue estos pasos para ponerlo en marcha:
 
 1.  **Clonar el repositorio:**
     ```bash
